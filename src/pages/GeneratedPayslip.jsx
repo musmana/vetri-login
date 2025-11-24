@@ -7,66 +7,67 @@ export default function GeneratedPayslip() {
   const { state } = useLocation();
   const slipRef = useRef(null);
 
-  // FIXED 100% WORKING PRINT FUNCTION
- const handlePrint = () => {
-  const content = slipRef.current.innerHTML;
+  // -------------------------
+  // PRINT FUNCTION (PERFECT)
+  // -------------------------
+  const handlePrint = () => {
+    const content = slipRef.current.innerHTML;
 
-  const printWindow = window.open("", "_blank", "width=900,height=1000");
+    const printWindow = window.open("", "_blank", "width=900,height=1000");
 
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Payslip</title>
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Payslip</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @page { size: A4; margin: 15mm; }
+            body { font-family: 'SF Pro Display', sans-serif; padding: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="p-6">${content}</div>
+        </body>
+      </html>
+    `);
 
-        <!-- Inject Tailwind CDN -->
-        <script src="https://cdn.tailwindcss.com"></script>
+    printWindow.document.close();
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 700);
+  };
 
-        <style>
-          @page { 
-            size: A4; 
-            margin: 15mm; 
-          }
-          body { 
-            font-family: 'SF Pro Display', sans-serif; 
-            padding: 20px; 
-          }
-        </style>
-      </head>
-
-      <body>
-        <div class="p-6">
-          ${content}
-        </div>
-      </body>
-    </html>
-  `);
-
-  printWindow.document.close();
-
-  setTimeout(() => {
-    printWindow.focus();
-    printWindow.print();
-  }, 700);
-};
-
-  // PDF DOWNLOAD
+  // -------------------------
+  // PDF DOWNLOAD (FIXED)
+  // -------------------------
   const handleDownload = () => {
     const element = slipRef.current;
-    html2pdf()
-      .from(element)
-      .set({
-        margin: 0.5,
-        filename: "Employee_Payslip.pdf",
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "A4", orientation: "portrait" },
-      })
-      .save();
+
+    const options = {
+      margin: 10,
+      filename: "Employee_Payslip.pdf",
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: {
+        scale: 3,
+        useCORS: true,
+        letterRendering: true,
+      },
+      jsPDF: {
+        unit: "px",
+        format: [800, 1120], // PERFECT A4 SIZE
+        orientation: "portrait",
+      },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+    };
+
+    html2pdf().set(options).from(element).save();
   };
 
   return (
     <div className="min-h-screen bg-[#F6FFE8] font-[SF Pro Display] pb-20">
 
-      {/* NAVBAR */}
+      {/* TOP NAVBAR */}
       <div className="flex justify-between items-center px-10 py-5 bg-white shadow">
         <div>
           <h1 className="text-2xl font-bold text-[#3C3084]">VETRI IT SYSTEMS</h1>
@@ -93,7 +94,7 @@ export default function GeneratedPayslip() {
       {/* TITLE */}
       <h2 className="text-center text-xl font-semibold mt-6">EMPLOYEE PAYSLIP</h2>
 
-      {/* PRINT & DOWNLOAD BUTTONS */}
+      {/* PRINT + DOWNLOAD BUTTONS */}
       <div className="flex justify-center gap-6 mt-6 mb-8">
         <button
           onClick={handlePrint}
@@ -110,17 +111,19 @@ export default function GeneratedPayslip() {
         </button>
       </div>
 
-      {/* PAYSLIP CONTENT (PRINT AREA) */}
+      {/* -------------------------
+          PAYSLIP CONTENT (A4 SAFE WIDTH)
+      -------------------------- */}
       <div
         ref={slipRef}
         id="print-area"
-        className="mx-auto w-[900px] bg-white p-10 rounded-2xl shadow border"
+        className="mx-auto w-[700px] bg-white p-10 rounded-2xl shadow border"
       >
 
-        {/* TOP HEADER */}
-        <div className="grid grid-cols-2 gap-10 items-start p-6">
-          
-          {/* LEFT — Logo + Company */}
+        {/* HEADER SECTION */}
+        <div className="flex justify-between items-start">
+
+          {/* LOGO + COMPANY INFO */}
           <div className="flex flex-col items-start gap-3">
             <img src="/vetri-logo.png" className="w-20 h-20 object-contain" />
 
@@ -136,35 +139,27 @@ export default function GeneratedPayslip() {
             </div>
           </div>
 
-          {/* RIGHT — Employee Statement */}
-          <div className="pl-4">
+          {/* EMPLOYEE STATEMENT */}
+          <div className="pl-4 w-[55%]">
             <p className="text-xl font-bold text-[#3C3084] underline mb-4">
               Employee Statement
             </p>
 
-            <div className="grid grid-cols-[150px_auto] gap-y-2 text-[15px]">
-              <span className="font-semibold">Employee Name</span>
-              <span>: {state.employeeName}</span>
-
-              <span className="font-semibold">Employee ID</span>
-              <span>: {state.employeeId}</span>
-
-              <span className="font-semibold">Pay Period</span>
-              <span>: {state.payPeriod}</span>
-
-              <span className="font-semibold">Paid Days</span>
-              <span>: {state.paidDays}</span>
-
-              <span className="font-semibold">Loss of Pay Days</span>
-              <span>: {state.lossDays}</span>
-
-              <span className="font-semibold">Payment Date</span>
-              <span>: {state.paymentDate}</span>
-            </div>
+            <table className="w-full text-[15px] leading-7">
+              <tbody>
+                <tr><td className="font-semibold w-40">Employee Name</td><td>: {state.employeeName}</td></tr>
+                <tr><td className="font-semibold">Employee ID</td><td>: {state.employeeId}</td></tr>
+                <tr><td className="font-semibold">Pay Period</td><td>: {state.payPeriod}</td></tr>
+                <tr><td className="font-semibold">Paid Days</td><td>: {state.paidDays}</td></tr>
+                <tr><td className="font-semibold">Loss of Pay Days</td><td>: {state.lossDays}</td></tr>
+                <tr><td className="font-semibold">Payment Date</td><td>: {state.paymentDate}</td></tr>
+              </tbody>
+            </table>
           </div>
+
         </div>
 
-        {/* EARNING + DEDUCTION */}
+        {/* EARNINGS & DEDUCTIONS */}
         <div className="grid grid-cols-2 gap-6 mt-10">
 
           {/* Earnings */}
@@ -215,9 +210,7 @@ export default function GeneratedPayslip() {
         {/* NET PAY */}
         <div className="border rounded-xl p-5 bg-[#F7FFE9] mt-10 relative">
           <p className="font-bold text-lg">TOTAL NET PAYABLE</p>
-          <p className="text-sm text-gray-700">
-            Gross Earnings - Total Deduction
-          </p>
+          <p className="text-sm text-gray-700">Gross Earnings - Total Deduction</p>
 
           <div className="absolute right-5 top-1/2 -translate-y-1/2">
             <div className="bg-[#3C3084] text-white px-6 py-2 rounded-xl text-lg font-semibold shadow">
@@ -233,7 +226,7 @@ export default function GeneratedPayslip() {
 
         <hr className="my-8" />
 
-        {/* SIGNATURE */}
+        {/* SIGNATURES */}
         <h3 className="text-center text-lg font-bold text-[#3C3084] mt-10 mb-10">
           ACKNOWLEDGED BY,
         </h3>
@@ -244,8 +237,7 @@ export default function GeneratedPayslip() {
             <div className="border-t-4 border-[#3C3084] mb-3"></div>
             <p className="font-bold text-lg">{state.employeeName}</p>
             <p className="text-sm mt-1">
-              Employee,{" "}
-              <span className="text-[#3C3084]">VETRI IT SYSTEMS PVT LTD.,</span>
+              Employee, <span className="text-[#3C3084]">VETRI IT SYSTEMS PVT LTD.,</span>
             </p>
           </div>
 
@@ -253,16 +245,13 @@ export default function GeneratedPayslip() {
             <div className="border-t-4 border-[#3C3084] mb-3"></div>
             <p className="font-bold text-lg">AUTHORISED NAME</p>
             <p className="text-sm mt-1">
-              Managing Director,{" "}
-              <span className="text-[#3C3084]">VETRI IT SYSTEMS PVT LTD.,</span>
+              Managing Director, <span className="text-[#3C3084]">VETRI IT SYSTEMS PVT LTD.,</span>
             </p>
           </div>
 
         </div>
 
       </div>
-      {/* END PRINT AREA */}
-
     </div>
   );
 }

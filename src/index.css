@@ -89,3 +89,39 @@ button:focus-visible {
   }
 }
 
+.payslip-pdf-container {
+  width: 794px;       /* A4 width in px */
+  min-height: 1123px; /* A4 height */
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* Fix grid collapse inside PDF */
+.payslip-pdf-container .grid {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.payslip-pdf-container .grid > div {
+  width: 48% !important;
+}
+
+/* Fix signature section alignment */
+.payslip-pdf-container .signature-block {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+}
+
+/* Ensure headings do not shift */
+.payslip-pdf-container h3,
+.payslip-pdf-container h2,
+.payslip-pdf-container h1 {
+  page-break-inside: avoid;
+}
+
+/* Prevent element overflow */
+.payslip-pdf-container * {
+  word-break: normal !important;
+  white-sp
